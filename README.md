@@ -9,8 +9,8 @@ LLM-ready sanitizer that blocks jailbreaks, prompt injections, RAG poisoning, ro
 <p>
 <a href="https://www.npmjs.com/package/secuprompt"><img src="https://img.shields.io/npm/v/secuprompt?color=2ecc71&label=npm" /></a>
 <a href="https://pypi.org/project/secuprompt"><img src="https://img.shields.io/pypi/v/secuprompt?color=2ecc71&label=pypi" /></a>
-<a href="https://github.com/caviraoss/secuprompt/stargazers"><img src="https://img.shields.io/github/stars/caviraoss/secuprompt?style=social" /></a>
-<a href="LICENSE"><img src="https://img.shields.io/github/license/caviraoss/secuprompt?color=3498db" /></a>
+<a href="https://github.com/WeblingStudio/PromptSecurity/stargazers"><img src="https://img.shields.io/github/stars/WeblingStudio/PromptSecurity?style=social" /></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/WeblingStudio/PromptSecurity?color=3498db" /></a>
 <a href="https://discord.gg/93M9XSuEj6"><img src="https://img.shields.io/discord/1379682804849180844?label=discord&color=7289da" /></a>
 </p>
 
@@ -192,8 +192,8 @@ secuprompt turns prompt validation into a reproducible, testable step instead of
 ## Contributing
 
 ```bash
-git clone https://github.com/caviraoss/secuprompt.git
-cd secuprompt
+git clone https://github.com/WeblingStudio/PromptSecurity.git
+cd PromptSecurity
 pnpm install && pnpm test
 pip install -e . && py test/demo_sanitize.py
 ```
