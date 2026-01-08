@@ -46,12 +46,15 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "test": "pnpm run build && npx tsx test/test_basic.ts",
+    "test:py": "python3 test/test_basic.py",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/node": "^25.0.3",
     "@typescript-eslint/eslint-plugin": "^8.52.0"
   }
 }
