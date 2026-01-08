@@ -1,4 +1,4 @@
-import { shield_input, shield_result } from "./types"
+import { ShieldInput, ShieldResult } from "./types"
 import { score_signatures } from "./modules/signature"
 import { score_semantic } from "./modules/semantic"
 import { score_integrity } from "./modules/integrity"
@@ -17,7 +17,7 @@ const default_weights = {
 
 const collect = (detail: string[], tag: string, score: number) => detail.length ? detail : score > 0 ? [tag] : []
 
-export const run_secuprompt = (input: shield_input, weights = default_weights): shield_result => {
+export const run_secuprompt = (input: ShieldInput, weights = default_weights): ShieldResult => {
   const system = input.system ?? ""
 
   const signature = score_signatures(input.user)

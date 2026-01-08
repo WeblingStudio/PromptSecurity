@@ -1,5 +1,5 @@
-import { module_score } from "../types"
-import { signature_patterns } from "../data"
+import { ModuleScore } from "../types"
+import { signaturePatterns } from "../data"
 import { seg_text, normalize } from "../core/embedding"
 
 type trie_node = { next: Record<string, trie_node>; end?: string[] }
@@ -17,7 +17,7 @@ const make_trie = (phrases: string[]): trie_node => {
   return root
 }
 
-const sig_trie = make_trie(signature_patterns)
+const sig_trie = make_trie(signaturePatterns)
 
 const scan_trie = (txt: string) => {
   const hits = new Set<string>()
@@ -60,7 +60,7 @@ const levenshtein = (a: string, b: string) => {
 const fuzzy_hits = (txt: string) => {
   const segs = seg_text(txt)
   const result: { phrase: string; sim: number }[] = []
-  for (const phrase of signature_patterns) {
+  for (const phrase of signaturePatterns) {
     for (const seg of segs) {
       const lv = levenshtein(seg, phrase)
       const sim = 1 - lv / Math.max(seg.length, phrase.length)
@@ -70,7 +70,7 @@ const fuzzy_hits = (txt: string) => {
   return result
 }
 
-export const score_signatures = (txt: string): module_score => {
+export const score_signatures = (txt: string): ModuleScore => {
   const exact = scan_trie(txt)
   const fuzzy = fuzzy_hits(txt)
   const reasons: string[] = []

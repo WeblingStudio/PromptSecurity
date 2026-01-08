@@ -1,8 +1,8 @@
-import { module_score } from "../types"
-import { semantic_clusters } from "../data"
+import { ModuleScore } from "../types"
+import { semanticClusters } from "../data"
 import { embed, cosine, normalize, vec_dim } from "../core/embedding"
 
-const cluster_vecs = semantic_clusters.map(({ tag, samples }) => {
+const cluster_vecs = semanticClusters.map(({ tag, samples }) => {
   const sum = new Array(vec_dim).fill(0)
   samples.forEach(s => {
     const e = embed(s)
@@ -13,7 +13,7 @@ const cluster_vecs = semantic_clusters.map(({ tag, samples }) => {
   return { tag, vec: sum }
 })
 
-export const score_semantic = (txt: string): module_score => {
+export const score_semantic = (txt: string): ModuleScore => {
   const vec = embed(txt)
   let best = 0
   let tag = "none"

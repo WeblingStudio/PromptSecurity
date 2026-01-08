@@ -1,15 +1,22 @@
 {
-  "name": "secuprompt",
-  "version": "1.0.0",
+  "name": "promptsecurity",
+  "version": "1.0.1",
   "description": "Protect your AI from Prompt Injection",
-  "main": "dist/index.js",
-  "git": "https://github.com/caviraoss/secuprompt.git",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json"
-  },
-  "author": "nullure",
+  "main": "dist/js/index.js",
+  "types": "dist/js/index.d.ts",
+  "author": "vinm0",
   "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "import": "./dist/js/index.js",
+      "require": "./dist/js/index.js",
+      "types": "./dist/js/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
   "keywords": [
     "llm",
     "prompt injection",
@@ -29,13 +36,22 @@
     "prompt firewall",
     "safety",
     "prompt security",
+    "ai security",
+    "ai firewall",
+    "ai injection",
+    "llm injection",
     "llm firewall",
     "secure prompts",
     "secuprompt"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm run build"
+  },
   "dependencies": {
-    "fs": "^0.0.1-security",
-    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.52.0"
   }
 }
