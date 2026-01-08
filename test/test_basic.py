@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Basic test suite for secuprompt Python implementation."""
+"""Basic test suite for promptsecurity Python implementation."""
 
 import sys
-from secuprompt import run_secuprompt as scan
+from promptsecurity import run_promptsecurity as scan
 
 
 def test_allows_benign_input():

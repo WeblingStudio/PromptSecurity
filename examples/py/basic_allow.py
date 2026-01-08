@@ -1,6 +1,6 @@
-from secuprompt import run_secuprompt
+from promptsecurity import run_promptsecurity
 
-review = run_secuprompt(user="Explain CORS and how browsers enforce it.")
+review = run_promptsecurity(user="Explain CORS and how browsers enforce it.")
 
 if review["action"] == "allow":
     print("allowed, forward to model")

@@ -1,5 +1,5 @@
 [project]
-name = "secuprompt"
+name = "promptsecurity"
 version = "0.1.0"
 description = "Protect your AI from Prompt Injection"
 requires-python = ">=3.9"

@@ -17,7 +17,7 @@ const default_weights = {
 
 const collect = (detail: string[], tag: string, score: number) => detail.length ? detail : score > 0 ? [tag] : []
 
-export const run_secuprompt = (input: ShieldInput, weights = default_weights): ShieldResult => {
+export const run_promptsecurity = (input: ShieldInput, weights = default_weights): ShieldResult => {
   const system = input.system ?? ""
 
   const signature = score_signatures(input.user)
@@ -72,7 +72,7 @@ export const run_secuprompt = (input: ShieldInput, weights = default_weights): S
 
   const removal_note =
     user_removed.length > 0
-      ? `[secuprompt removed ${user_removed.length} segment(s): ${user_removed
+      ? `[promptsecurity removed ${user_removed.length} segment(s): ${user_removed
         .map(seg => seg.reasons[0] ?? "segment_risk")
         .join(", ")}]`
       : ""
@@ -80,7 +80,7 @@ export const run_secuprompt = (input: ShieldInput, weights = default_weights): S
     user_changed
       ? sanitized_user.length > 0
         ? `[sanitized user] ${sanitized_user}`
-        : "[secuprompt removed user content]"
+        : "[promptsecurity removed user content]"
       : ""
   const sanitized_parts = [
     user_line,
@@ -99,10 +99,10 @@ export const run_secuprompt = (input: ShieldInput, weights = default_weights): S
   }
 }
 
-export const secuprompt = {
-  scan: run_secuprompt
+export const promptsecurity = {
+  scan: run_promptsecurity
 }
 
-export default secuprompt
+export default promptsecurity
 
 // complexity: overall runtime goes linear with prompt length plus signature count

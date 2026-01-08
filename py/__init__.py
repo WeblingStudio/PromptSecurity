@@ -1,3 +1,3 @@
-from .engine import run_secuprompt
+from .engine import run_promptsecurity
 
-__all__ = ["run_secuprompt"]
+__all__ = ["run_promptsecurity"]

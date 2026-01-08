@@ -8,7 +8,7 @@ PromptSecurity is a dual-runtime (TypeScript/Python) library for detecting and s
 
 **Published as:**
 - npm: `promptsecurity`
-- PyPI: `secuprompt`
+- PyPI: `promptsecurity`
 
 **Repository:** https://github.com/WeblingStudio/PromptSecurity
 
@@ -26,6 +26,11 @@ npm run build
 # tsconfig.json is for IDE/development only
 tsc -p tsconfig.build.json
 
+# Run tests
+pnpm test
+# or
+npm test
+
 # Run demo
 npx tsx test/demo_sanitize.ts
 ```
@@ -36,8 +41,11 @@ npx tsx test/demo_sanitize.ts
 # Install in development mode
 pip install -e .
 
+# Run tests
+python3 test/test_basic.py
+
 # Run demo
-python test/demo_sanitize.py
+python3 test/demo_sanitize.py
 ```
 
 ### Publishing
@@ -51,7 +59,7 @@ The package uses `prepublishOnly` hook to automatically build before publishing.
 The codebase maintains parallel implementations in TypeScript and Python with identical APIs and behavior:
 
 - **TypeScript:** `js/` directory → builds to `dist/`
-- **Python:** `py/` directory → maps to `secuprompt` package name
+- **Python:** `py/` directory → maps to `promptsecurity` package name
 
 ### Core Engine Flow
 
@@ -118,15 +126,21 @@ The build config must have `resolveJsonModule: true` to import `data/*.json` fil
 
 ## Python Packaging
 
-`setup.py` uses a custom `build_py` command to copy `data/` directory into the built package as `secuprompt/data_files/`. This ensures data files are available when the package is installed from PyPI.
+`setup.py` uses a custom `build_py` command to copy `data/` directory into the built package as `promptsecurity/data_files/`. This ensures data files are available when the package is installed from PyPI.
 
 ## Testing
 
 Test files are in `test/`:
-- `demo_sanitize.ts`: TypeScript example showing layered attacks and RAG poisoning
-- `demo_sanitize.py`: Python example showing basic sanitization
+- `test_basic.ts`: TypeScript test suite covering core functionality
+- `test_basic.py`: Python test suite with equivalent tests
+- `demo_sanitize.ts`: TypeScript demo showing layered attacks and RAG poisoning
+- `demo_sanitize.py`: Python demo showing basic sanitization
 
-There are no formal test suites currently. Demos serve as integration tests.
+Run tests with:
+- TypeScript: `pnpm test` or `npm test`
+- Python: `python3 test/test_basic.py` (requires `pip install -e .` first)
+
+The test suites cover basic input handling, jailbreak detection, RAG poisoning, result structure, and edge cases.
 
 ## Examples
 

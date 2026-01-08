@@ -1,6 +1,6 @@
-import secuprompt from "secuprompt"
+import promptsecurity from "promptsecurity"
 
-const review = secuprompt.scan({
+const review = promptsecurity.scan({
   user: "Summarize how HTTPS handshakes work for a beginner.",
 })
 

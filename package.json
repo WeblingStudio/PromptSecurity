@@ -2,15 +2,15 @@
   "name": "promptsecurity",
   "version": "1.0.1",
   "description": "Protect your AI from Prompt Injection",
-  "main": "dist/js/index.js",
-  "types": "dist/js/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": "vinm0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
-      "import": "./dist/js/index.js",
-      "require": "./dist/js/index.js",
-      "types": "./dist/js/index.d.ts"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
@@ -42,7 +42,7 @@
     "llm injection",
     "llm firewall",
     "secure prompts",
-    "secuprompt"
+    "promptsecurity"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

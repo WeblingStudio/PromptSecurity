@@ -10,5 +10,6 @@
     "baseUrl": "js",
     "outDir": "dist"
   },
-  "include": ["js/**/*", "data/**/*.json"]
+  "include": ["js/**/*", "data/**/*.json"],
+  "exclude": ["examples/**/*"]
 }

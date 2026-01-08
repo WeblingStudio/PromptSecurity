@@ -1,4 +1,4 @@
-from secuprompt import run_secuprompt
+from promptsecurity import run_promptsecurity
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableSequence
 
@@ -6,9 +6,9 @@ llm = ChatOpenAI(model="gpt-4o-mini")
 
 
 async def guard_and_call(input: dict):
-    review = run_secuprompt(user=input["user"])
+    review = run_promptsecurity(user=input["user"])
     if review["action"] == "block":
-        raise RuntimeError("blocked by secuprompt")
+        raise RuntimeError("blocked by promptsecurity")
     prompt = review["sanitized_prompt"] if review["action"] == "sanitize" else input["user"]
     return await llm.ainvoke(prompt)
 

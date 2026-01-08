@@ -23,7 +23,7 @@ def _collect(detail: List[str], fallback: str, score: float) -> List[str]:
     return detail if detail else ([fallback] if score > 0 else [])
 
 
-def run_secuprompt(user: str, system: str = "", rag: List[str] | None = None, weights: Dict[str, float] | None = None) -> Dict[str, object]:
+def run_promptsecurity(user: str, system: str = "", rag: List[str] | None = None, weights: Dict[str, float] | None = None) -> Dict[str, object]:
     weights = {**DEFAULT_WEIGHTS, **(weights or {})}
     signature = score_signatures(user)
     semantic = score_semantic(user)
@@ -60,14 +60,14 @@ def run_secuprompt(user: str, system: str = "", rag: List[str] | None = None, we
     sanitized_user, user_removed, user_changed = sanitize_user_input(system, user)
     removal_note = ""
     if user_removed:
-        removal_note = "[secuprompt removed {} segment(s): {}]".format(
+        removal_note = "[promptsecurity removed {} segment(s): {}]".format(
             len(user_removed),
             ", ".join(rem["reasons"][0] if rem["reasons"] else "segment_risk" for rem in user_removed),
         )
     user_line = ""
     if user_changed:
         user_line = "[sanitized user] {}".format(
-            sanitized_user if sanitized_user else "[secuprompt removed user content]"
+            sanitized_user if sanitized_user else "[promptsecurity removed user content]"
         )
     sanitized_parts = [part for part in [user_line, removal_note, "\n".join(sanitized_chunks)] if part]
     sanitized_prompt = "\n".join(sanitized_parts) if sanitized_parts else None

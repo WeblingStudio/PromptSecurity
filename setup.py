@@ -11,8 +11,8 @@ class CustomBuildPy(build_py):
         
         # Define source and destination
         source_data = Path(__file__).parent / "data"
-        # build_lib is where the package is built, e.g., build/lib/secuprompt
-        dest_data = Path(self.build_lib) / "secuprompt" / "data_files"
+        # build_lib is where the package is built, e.g., build/lib/promptsecurity
+        dest_data = Path(self.build_lib) / "promptsecurity" / "data_files"
         
         # Copy data files
         if source_data.exists():
@@ -25,8 +25,8 @@ class CustomBuildPy(build_py):
             print(f"Warning: Data directory {source_data} not found!")
 
 setup(
-    packages=["secuprompt"],
-    package_dir={"secuprompt": "py"},
+    packages=["promptsecurity"],
+    package_dir={"promptsecurity": "py"},
     cmdclass={
         'build_py': CustomBuildPy,
     },
