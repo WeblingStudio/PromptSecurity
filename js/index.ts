@@ -5,6 +5,7 @@ import { score_integrity } from "./modules/integrity"
 import { score_rag, sanitize_rag_chunks } from "./modules/rag"
 import { score_unicode } from "./modules/unicode"
 import { score_segments, sanitize_user_input } from "./modules/sentence_guard"
+import { normalizeInput } from "./core/normalizer"
 
 const default_weights = {
   signature: 0.35,
@@ -20,12 +21,17 @@ const collect = (detail: string[], tag: string, score: number) => detail.length 
 export const run_promptsecurity = (input: ShieldInput, weights = default_weights): ShieldResult => {
   const system = input.system ?? ""
 
-  const signature = score_signatures(input.user)
-  const semantic = score_semantic(input.user)
-  const integrity = score_integrity(system, input.user)
+  // Step 1: Normalize input to detect and neutralize obfuscation
+  const normalization = normalizeInput(input.user)
+  const normalizedUser = normalization.normalized
+
+  // Step 2: Score modules using normalized input
+  const signature = score_signatures(normalizedUser)
+  const semantic = score_semantic(normalizedUser)
+  const integrity = score_integrity(system, normalizedUser)
   const rag = score_rag(input.rag)
-  const unicode = score_unicode(input.user)
-  const segments = score_segments(system, input.user)
+  const unicode = score_unicode(input.user)  // Keep original for Unicode detection
+  const segments = score_segments(system, normalizedUser)
 
   let risk =
     signature.score * (weights.signature ?? default_weights.signature) +
@@ -46,11 +52,13 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
     ...collect(integrity.detail, "integrity_risk", integrity.score),
     ...collect(rag.detail, "rag_poison", rag.score),
     ...collect(unicode.detail, "unicode_anomaly", unicode.score),
-    ...collect(segments.detail, "segment_threat", segments.score)
+    ...collect(segments.detail, "segment_threat", segments.score),
+    // Add obfuscation detection to reasons (if any detections)
+    ...normalization.detections.map(d => `obfuscation_${d}`)
   ]
 
   const sanitized_chunks = sanitize_rag_chunks(input.rag, rag.detail)
-  const { sanitized: sanitized_user, removed: user_removed, changed: user_changed } = sanitize_user_input(system, input.user)
+  const { sanitized: sanitized_user, removed: user_removed, changed: user_changed } = sanitize_user_input(system, normalizedUser)
 
   // hard rules: any removal/sanitize forces sanitize or block regardless of numeric risk
   const ragChanged = sanitized_chunks.some(chunk => chunk.startsWith("[rag chunk"))
@@ -64,7 +72,8 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
     semantic.score >= 0.65 ||
     signature.score > 0 ||
     segments.score >= 0.1 ||
-    unicode.score >= 0.25
+    unicode.score >= 0.25 ||
+    normalization.obfuscationScore > 0.5  // High obfuscation is a threat
 
   if (hasThreat) {
     action = "block"
