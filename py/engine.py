@@ -23,7 +23,7 @@ def _collect(detail: List[str], fallback: str, score: float) -> List[str]:
     return detail if detail else ([fallback] if score > 0 else [])
 
 
-def run_secuprompt(user: str, system: str = "", rag: List[str] | None = None, weights: Dict[str, float] | None = None) -> Dict[str, object]:
+def run_promptsecurity(user: str, system: str = "", rag: List[str] | None = None, weights: Dict[str, float] | None = None) -> Dict[str, object]:
     weights = {**DEFAULT_WEIGHTS, **(weights or {})}
     signature = score_signatures(user)
     semantic = score_semantic(user)
@@ -60,26 +60,36 @@ def run_secuprompt(user: str, system: str = "", rag: List[str] | None = None, we
     sanitized_user, user_removed, user_changed = sanitize_user_input(system, user)
     removal_note = ""
     if user_removed:
-        removal_note = "[secuprompt removed {} segment(s): {}]".format(
+        removal_note = "[promptsecurity removed {} segment(s): {}]".format(
             len(user_removed),
             ", ".join(rem["reasons"][0] if rem["reasons"] else "segment_risk" for rem in user_removed),
         )
     user_line = ""
     if user_changed:
         user_line = "[sanitized user] {}".format(
-            sanitized_user if sanitized_user else "[secuprompt removed user content]"
+            sanitized_user if sanitized_user else "[promptsecurity removed user content]"
         )
     sanitized_parts = [part for part in [user_line, removal_note, "\n".join(sanitized_chunks)] if part]
     sanitized_prompt = "\n".join(sanitized_parts) if sanitized_parts else None
     rag_changed = any(chunk.startswith("[rag chunk") for chunk in sanitized_chunks)
-    dangerous = any(
-        any(reason in ("hint_dan_role", "hint_hidden_directives", "hint_reveal_system", "hint_override_policy") for reason in rem.get("reasons", []))
-        for rem in user_removed
+    rag_drops = any("_drop" in reason for reason in rag_score["detail"])
+
+    # hard rules: any removal/sanitize forces sanitize or block regardless of numeric risk
+    has_threat = (
+        rag_drops
+        or len(rag_score["detail"]) > 0
+        or len(sanitized_chunks) > 0
+        or len(user_removed) > 0
+        or rag_changed
+        or semantic["score"] >= 0.65
+        or signature["score"] > 0
+        or segments["score"] >= 0.1
+        or unicode_mod["score"] >= 0.25
     )
-    if dangerous:
+
+    if has_threat:
         action = "block"
-    elif action == "allow" and (user_changed or rag_changed):
-        action = "sanitize"
+        risk = max(risk, 0.99)
 
     modules = {
         "signature": signature,

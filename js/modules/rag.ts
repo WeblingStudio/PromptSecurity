@@ -1,5 +1,5 @@
-import { module_score } from "../types"
-import { rag_config } from "../data"
+import { ModuleScore } from "../types"
+import { ragConfig } from "../data"
 import { embed, cosine, normalize } from "../core/embedding"
 
 const esc = (txt: string) => txt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -35,12 +35,12 @@ const imperative_triggers = [
 const is_imperative_sentence = (sentence: string) => {
   const low = sentence.toLowerCase()
   const first = sentence.split(/\s+/)[0]?.toLowerCase() ?? ""
-  if (rag_config.imperative_words.includes(first)) return true
+  if (ragConfig.imperative_words.includes(first)) return true
   if (imperative_triggers.some(reg => reg.test(sentence))) return true
-  return rag_config.role_words.some(w => low.includes(w) && /must|should|need|follow|obey|ignore/.test(low))
+  return ragConfig.role_words.some(w => low.includes(w) && /must|should|need|follow|obey|ignore/.test(low))
 }
 
-const rag_center = embed(rag_config.semantic_probe)
+const rag_center = embed(ragConfig.semantic_probe)
 
 type chunk_analysis = {
   threat: number
@@ -59,7 +59,7 @@ const sanitize_chunk = (chunk: string) => {
       return false
     }
     const low = seg.toLowerCase()
-    if (rag_config.role_words.some(w => low.includes(w))) {
+    if (ragConfig.role_words.some(w => low.includes(w))) {
       changed = true
       return false
     }
@@ -73,7 +73,7 @@ const analyze_chunk = (chunk: string): chunk_analysis => {
   const sentences = sentence_split(chunk)
   const imp_hits = sentences.filter(is_imperative_sentence).length
   const imp_density = sentences.length ? imp_hits / sentences.length : 0
-  const role = count_words(chunk, rag_config.role_words)
+  const role = count_words(chunk, ragConfig.role_words)
   const sim = cosine(embed(chunk), rag_center)
   let threat = 0.35 * imp_density + 0.4 * sim + 0.25 * Math.min(1, role / 2)
   let drop = threat > 0.2
@@ -96,7 +96,7 @@ const analyze_chunk = (chunk: string): chunk_analysis => {
   }
 }
 
-export const score_rag = (chunks?: string[]): module_score => {
+export const score_rag = (chunks?: string[]): ModuleScore => {
   if (!chunks?.length) return { score: 0, detail: [] }
   const issues: string[] = []
   let top = 0

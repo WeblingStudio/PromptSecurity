@@ -1,5 +1,5 @@
-import { module_score } from "../types"
-import { modality_map } from "../data"
+import { ModuleScore } from "../types"
+import { modalityMap } from "../data"
 import { embed, cosine, normalize, seg_text } from "../core/embedding"
 
 type directive = { topic: string; pol: number }
@@ -8,8 +8,8 @@ const esc = (txt: string) => txt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 const make_reg = (list: string[]) => new RegExp(list.map(esc).join("|"), "gi")
 
 const modal_rules: [RegExp, number][] = [
-  [make_reg(modality_map.negative), -1],
-  [make_reg(modality_map.positive), 1]
+  [make_reg(modalityMap.negative), -1],
+  [make_reg(modalityMap.positive), 1]
 ]
 
 const extract_directives = (txt: string): directive[] => {
@@ -61,7 +61,7 @@ const overlap_score = (sys: string, user: string) => {
   return sum / u.length
 }
 
-export const score_integrity = (sys: string, user: string): module_score => {
+export const score_integrity = (sys: string, user: string): ModuleScore => {
   const overlap = overlap_score(sys, user)
   const flips = detect_flip(sys, user)
   const reasons: string[] = []

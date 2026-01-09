@@ -1,27 +1,28 @@
-import { readFileSync } from "fs"
-import { resolve } from "path"
+import _signaturePatterns from '../data/patterns.json';
+import _semanticClusters from '../data/threats.json';
+import _unicodeRanges from '../data/unicode.json';
+import _ragConfig from '../data/rag.json';
+import _modalityMap from '../data/modality.json';
 
-const data_root = resolve(__dirname, "..", "data")
+export const signaturePatterns = _signaturePatterns as string[];
 
-const load_json = <t>(file: string): t => {
-  const full = resolve(data_root, file)
-  return JSON.parse(readFileSync(full, "utf8")) as t
-}
+export const semanticClusters = _semanticClusters as { 
+  tag: string; 
+  samples: string[] 
+}[];
 
-export const signature_patterns = load_json<string[]>("patterns.json")
-export const semantic_clusters = load_json<
-  { tag: string; samples: string[] }[]
->("threats.json")
-export const rag_config = load_json<{
-  imperative_words: string[]
-  role_words: string[]
-  semantic_probe: string
-}>("rag.json")
-export const unicode_ranges = load_json<{
-  hidden_ranges: [number, number][]
-  homoglyph_blocks: [number, number][]
-}>("unicode.json")
-export const modality_map = load_json<{
-  positive: string[]
-  negative: string[]
-}>("modality.json")
+export const ragConfig = _ragConfig as {
+  imperative_words: string[];
+  role_words: string[];
+  semantic_probe: string;
+};
+
+export const unicodeRanges = _unicodeRanges as {
+  hidden_ranges: [number, number][];
+  homoglyph_blocks: [number, number][];
+};
+
+export const modalityMap = _modalityMap as {
+  positive: string[];
+  negative: string[];
+};

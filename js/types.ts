@@ -1,23 +1,29 @@
-export type shield_input = {
-  user: string
-  system?: string
-  rag?: string[]
+export type Prompt = string
+
+export type RAGContext = string[]
+
+export type Score = number
+
+export type ShieldInput = {
+  user: Prompt
+  system?: Prompt
+  rag?: RAGContext
 }
 
-export type module_score = { score: number; detail: string[] }
+export type ModuleScore = { score: Score; detail: string[] }
 
-export type shield_result = {
+export type ShieldResult = {
   allowed: boolean
   action: "allow" | "sanitize" | "block"
-  risk: number
+  risk: Score
   reason: string[]
-  sanitized_prompt?: string
+  sanitized_prompt?: Prompt
   modules: {
-    signature: module_score
-    semantic: module_score
-    integrity: module_score
-    rag: module_score
-    unicode: module_score
-    segments: module_score
+    signature: ModuleScore
+    semantic: ModuleScore
+    integrity: ModuleScore
+    rag: ModuleScore
+    unicode: ModuleScore
+    segments: ModuleScore
   }
 }

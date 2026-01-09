@@ -1,4 +1,4 @@
-import { module_score } from "../types"
+import { ModuleScore } from "../types"
 import { normalize } from "../core/embedding"
 import { score_signatures } from "./signature"
 import { score_semantic } from "./semantic"
@@ -48,7 +48,7 @@ export const analyze_user_sentences = (system: string, user: string) => {
   return sentences.map(s => analyze_sentence(system, s))
 }
 
-export const score_segments = (system: string, user: string): module_score => {
+export const score_segments = (system: string, user: string): ModuleScore => {
   const sentences = analyze_user_sentences(system, user)
   if (!sentences.length) return { score: 0, detail: [] }
   const maxScore = Math.max(...sentences.map(s => s.score))

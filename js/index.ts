@@ -1,4 +1,4 @@
-import { shield_input, shield_result } from "./types"
+import { ShieldInput, ShieldResult } from "./types"
 import { score_signatures } from "./modules/signature"
 import { score_semantic } from "./modules/semantic"
 import { score_integrity } from "./modules/integrity"
@@ -17,7 +17,7 @@ const default_weights = {
 
 const collect = (detail: string[], tag: string, score: number) => detail.length ? detail : score > 0 ? [tag] : []
 
-export const run_secuprompt = (input: shield_input, weights = default_weights): shield_result => {
+export const run_promptsecurity = (input: ShieldInput, weights = default_weights): ShieldResult => {
   const system = input.system ?? ""
 
   const signature = score_signatures(input.user)
@@ -61,9 +61,10 @@ export const run_secuprompt = (input: shield_input, weights = default_weights): 
     sanitized_chunks.length > 0 ||
     user_removed.length > 0 ||
     ragChanged ||
-    semantic.score >= 0.5 ||
+    semantic.score >= 0.65 ||
     signature.score > 0 ||
-    segments.score >= 0.1
+    segments.score >= 0.1 ||
+    unicode.score >= 0.25
 
   if (hasThreat) {
     action = "block"
@@ -72,7 +73,7 @@ export const run_secuprompt = (input: shield_input, weights = default_weights): 
 
   const removal_note =
     user_removed.length > 0
-      ? `[secuprompt removed ${user_removed.length} segment(s): ${user_removed
+      ? `[promptsecurity removed ${user_removed.length} segment(s): ${user_removed
         .map(seg => seg.reasons[0] ?? "segment_risk")
         .join(", ")}]`
       : ""
@@ -80,7 +81,7 @@ export const run_secuprompt = (input: shield_input, weights = default_weights): 
     user_changed
       ? sanitized_user.length > 0
         ? `[sanitized user] ${sanitized_user}`
-        : "[secuprompt removed user content]"
+        : "[promptsecurity removed user content]"
       : ""
   const sanitized_parts = [
     user_line,
@@ -99,10 +100,10 @@ export const run_secuprompt = (input: shield_input, weights = default_weights): 
   }
 }
 
-export const secuprompt = {
-  scan: run_secuprompt
+export const promptsecurity = {
+  scan: run_promptsecurity
 }
 
-export default secuprompt
+export default promptsecurity
 
 // complexity: overall runtime goes linear with prompt length plus signature count
