@@ -28,7 +28,7 @@ def score_semantic(text: str) -> dict:
         if sim > best:
             best = sim
             best_tag = cluster["tag"]
-    level = "high" if best >= 0.78 else "medium" if best >= 0.5 else "low"
+    level = "high" if best >= 0.78 else "medium" if best >= 0.65 else "low"
     detail = [] if level == "low" else [f"semantic_{level}_{best_tag}"]
-    score = best if best >= 0.5 else best * 0.5
+    score = best if best >= 0.65 else best * 0.5
     return {"score": normalize(score), "detail": detail}

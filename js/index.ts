@@ -61,9 +61,10 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
     sanitized_chunks.length > 0 ||
     user_removed.length > 0 ||
     ragChanged ||
-    semantic.score >= 0.5 ||
+    semantic.score >= 0.65 ||
     signature.score > 0 ||
-    segments.score >= 0.1
+    segments.score >= 0.1 ||
+    unicode.score >= 0.25
 
   if (hasThreat) {
     action = "block"

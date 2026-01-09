@@ -72,14 +72,24 @@ def run_promptsecurity(user: str, system: str = "", rag: List[str] | None = None
     sanitized_parts = [part for part in [user_line, removal_note, "\n".join(sanitized_chunks)] if part]
     sanitized_prompt = "\n".join(sanitized_parts) if sanitized_parts else None
     rag_changed = any(chunk.startswith("[rag chunk") for chunk in sanitized_chunks)
-    dangerous = any(
-        any(reason in ("hint_dan_role", "hint_hidden_directives", "hint_reveal_system", "hint_override_policy") for reason in rem.get("reasons", []))
-        for rem in user_removed
+    rag_drops = any("_drop" in reason for reason in rag_score["detail"])
+
+    # hard rules: any removal/sanitize forces sanitize or block regardless of numeric risk
+    has_threat = (
+        rag_drops
+        or len(rag_score["detail"]) > 0
+        or len(sanitized_chunks) > 0
+        or len(user_removed) > 0
+        or rag_changed
+        or semantic["score"] >= 0.65
+        or signature["score"] > 0
+        or segments["score"] >= 0.1
+        or unicode_mod["score"] >= 0.25
     )
-    if dangerous:
+
+    if has_threat:
         action = "block"
-    elif action == "allow" and (user_changed or rag_changed):
-        action = "sanitize"
+        risk = max(risk, 0.99)
 
     modules = {
         "signature": signature,

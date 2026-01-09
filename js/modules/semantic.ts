@@ -21,8 +21,8 @@ export const score_semantic = (txt: string): ModuleScore => {
     const sim = cosine(vec, c_vec)
     if (sim > best) { best = sim; tag = c_tag }
   }
-  const level = best >= 0.78 ? "high" : best >= 0.5 ? "medium" : "low"
+  const level = best >= 0.78 ? "high" : best >= 0.65 ? "medium" : "low"
   const detail = level === "low" ? [] : [`semantic_${level}_${tag}`]
-  const score = best >= 0.5 ? best : best * 0.5
+  const score = best >= 0.65 ? best : best * 0.5
   return { score: normalize(score), detail }
 }
