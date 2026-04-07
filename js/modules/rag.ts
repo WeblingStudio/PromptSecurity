@@ -97,7 +97,7 @@ const analyze_chunk = (chunk: string): chunk_analysis => {
 }
 
 export const score_rag = (chunks?: string[]): ModuleScore => {
-  if (!chunks?.length) return { score: 0, detail: [] }
+  if (!chunks?.length) return { score: 0, detail: [], confidence: 0.9 }  // High confidence when no RAG
   const issues: string[] = []
   let top = 0
   for (let i = 0; i < chunks.length; i++) {
@@ -106,7 +106,16 @@ export const score_rag = (chunks?: string[]): ModuleScore => {
     if (analysis.drop) issues.push(`rag_chunk_${i}_drop`)
     else if (analysis.sanitize) issues.push(`rag_chunk_${i}_sanitize`)
   }
-  return { score: normalize(top), detail: issues }
+
+  // Confidence increases with number of chunks analyzed and threat clarity
+  let confidence = 0.7  // Baseline
+  if (issues.length === 0 && chunks.length >= 3) {
+    confidence = 0.85  // Confident when multiple clean chunks
+  } else if (issues.length > 0) {
+    confidence = 0.8 + Math.min(0.2, issues.length * 0.1)  // More issues = higher confidence
+  }
+
+  return { score: normalize(top), detail: issues, confidence }
 }
 
 export const drop_rag_chunks = (chunks?: string[], flags?: string[]) => {

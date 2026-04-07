@@ -70,5 +70,16 @@ export const score_integrity = (sys: string, user: string): ModuleScore => {
   let score = 0
   if (flips) score = Math.min(1, 0.7 + 0.1 * (flips - 1) + overlap * 0.3)
   else score = Math.max(0, overlap - 0.4)
-  return { score: normalize(score), detail: reasons }
+
+  // Confidence based on clarity of contradiction or overlap
+  let confidence = 0.7  // Moderate baseline
+  if (flips > 0) {
+    confidence = 0.9 + Math.min(0.1, flips * 0.05)  // High confidence in contradictions
+  } else if (overlap > 0.8) {
+    confidence = 0.85  // High overlap is clear signal
+  } else if (overlap > 0.65) {
+    confidence = 0.75  // Medium overlap
+  }
+
+  return { score: normalize(score), detail: reasons, confidence }
 }

@@ -15,5 +15,16 @@ const unicode_flags = (txt: string) => {
 
 export const score_unicode = (txt: string): ModuleScore => {
   const flags = unicode_flags(txt)
-  return { score: normalize(flags / 4), detail: flags ? [`unicode_flags_${flags}`] : [] }
+
+  // Confidence increases with number of flags detected
+  let confidence = 0.5  // Moderate baseline
+  if (flags === 0) {
+    confidence = 0.8  // Pretty confident when no flags found
+  } else if (flags >= 4) {
+    confidence = 1.0  // Very confident when many flags
+  } else {
+    confidence = 0.7 + flags * 0.1  // Scale with flags: 0.8, 0.9, 1.0
+  }
+
+  return { score: normalize(flags / 4), detail: flags ? [`unicode_flags_${flags}`] : [], confidence }
 }

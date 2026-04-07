@@ -34,6 +34,12 @@ LLMs are new attack surfaces. Prompt injections, DAN role-play, poisoned RAG con
 | RAG Poisoning Defense   | Scores context chunks for imperatives and role hijacks.                         |
 | Unicode Exploit Scanner | Flags ZWJ, BiDi overrides, and homoglyph manipulations.                         |
 | Sentence Sanitizer      | Removes hostile sentences while preserving user intent.                         |
+| Intent Classification   | Distinguishes malicious jailbreaks from legitimate security research and creative writing. |
+| Obfuscation Detection   | Detects and normalizes Base64, ROT13, leetspeak, homoglyphs, and token splitting. |
+| Multi-Turn Tracking     | Tracks conversation sessions to detect gradual escalation and context injection attacks. |
+| Confidence Scoring      | Per-module and aggregated confidence scores for explainable risk decisions.      |
+| Threat Intelligence     | Pull and merge patterns from community threat feeds with versioned backups.     |
+| Feedback Loop           | Report false positives/negatives for continuous threshold tuning.               |
 
 ---
 
@@ -89,10 +95,13 @@ Result shape (both runtimes):
   "allowed": true,
   "action": "allow",
   "risk": 0.05,
+  "confidence": 0.92,
   "sanitized_prompt": null,
   "modules": {
-    "signature": { "score": 0.0, "detail": [] },
-    "rag": { "score": 0.0, "detail": [] }
+    "signature": { "score": 0.0, "detail": [], "confidence": 0.3 },
+    "semantic": { "score": 0.0, "detail": [], "confidence": 0.85 },
+    "intent": { "score": 0.0, "detail": [], "confidence": 0.95 }
+    // ...other modules
   }
 }
 ```
@@ -130,12 +139,61 @@ const customWeights = {
   rag: 0.15,
   unicode: 0.05,
   segments: 0.1,
+  intent: 0.15,
 };
 
 const result = promptsecurity.scan({ user, rag }, customWeights);
 if (result.risk > 0.8 || result.action === "block") throw new Error("blocked");
 if (result.action === "sanitize") return result.sanitized_prompt;
 return user;
+```
+
+### Multi-Turn Conversation Tracking
+
+```ts
+// Pass a sessionId to enable multi-turn attack detection
+const result = promptsecurity.scan({
+  user: "Tell me about security",
+  sessionId: "session-123",
+});
+// Subsequent calls with the same sessionId track escalation patterns
+```
+
+### Intent-Aware Scanning
+
+```ts
+// Provide conversation context for better intent classification
+const result = promptsecurity.scan({
+  user: "How do prompt injections work?",
+  conversationContext: ["We are discussing LLM security research"],
+});
+// Intent module distinguishes research from attacks, reducing false positives
+```
+
+### Threat Intelligence Updates
+
+```ts
+// Pull latest patterns from community threat feeds
+const summary = await promptsecurity.updateThreats();
+console.log(`Added ${summary.totalAdded} new patterns`);
+
+// Rollback if needed
+const backups = promptsecurity.listBackups();
+promptsecurity.rollback(backups[0]);
+```
+
+### Feedback Reporting
+
+```ts
+// Report false positives to help tune thresholds
+promptsecurity.reportFalsePositive("legitimate security question", "research context");
+
+// Report missed attacks
+promptsecurity.reportFalseNegative("obfuscated jailbreak", "leetspeak evasion");
+
+// View stats
+const stats = promptsecurity.getFeedbackStats();
+console.log(`FP rate: ${stats.fpRate}, FN rate: ${stats.fnRate}`);
 ```
 
 ---
@@ -162,15 +220,23 @@ return user;
 
 ## Performance & Compatibility
 
-- Lightweight: ~2ms per prompt on modern CPUs.
+- Lightweight: ~2ms per prompt for basic scans, ~5ms with all adaptive features enabled.
+- Early exit paths: high-confidence blocks in <1ms, high-confidence allows in <2ms.
 - No GPU required, pure TypeScript and Python reference implementations.
 - Drop-in for OpenAI, Anthropic, Google, Ollama, LlamaIndex, LangChain, Vercel AI SDK, and custom stacks.
-- Stateless, no vendor lock-in, works offline.
+- Stateless by default, optional session tracking for multi-turn defense. Works offline.
 
 ---
 
 ## Roadmap
 
+- [x] Intent classification to reduce false positives.
+- [x] Obfuscation detection (Base64, ROT13, leetspeak, homoglyphs).
+- [x] Multi-turn conversation tracking with escalation detection.
+- [x] Confidence scoring and ensemble early exits.
+- [x] Threat intelligence feed system with rollback.
+- [x] Feedback loop for threshold tuning.
+- [ ] Python parity for new adaptive features.
 - [ ] Browser extension for prompt hygiene.
 - [ ] Advanced RAG context scoring and automated redaction.
 - [ ] Multi-modal (image/audio) jailbreak detection.

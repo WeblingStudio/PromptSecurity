@@ -79,5 +79,15 @@ export const score_signatures = (txt: string): ModuleScore => {
   const ex_score = exact.length ? Math.min(1, 0.6 + 0.1 * (exact.length - 1)) : 0
   const f_best = fuzzy.reduce((m, v) => Math.max(m, v.sim), 0)
   const f_score = f_best ? ((f_best - 0.82) / (1 - 0.82)) * 0.6 : 0
-  return { score: normalize(ex_score + f_score), detail: reasons }
+
+  // Confidence: 1.0 for exact match, based on similarity for fuzzy, 0.3 for no match
+  let confidence = 0.3  // Low confidence when no signatures found
+  if (exact.length > 0) {
+    confidence = 1.0  // 100% confident in exact signature matches
+  } else if (fuzzy.length > 0) {
+    // Confidence scales with fuzzy match quality (0.82-1.0 → 0.85-0.95)
+    confidence = 0.85 + (f_best - 0.82) * 0.5
+  }
+
+  return { score: normalize(ex_score + f_score), detail: reasons, confidence }
 }

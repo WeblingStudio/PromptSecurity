@@ -50,13 +50,24 @@ export const analyze_user_sentences = (system: string, user: string) => {
 
 export const score_segments = (system: string, user: string): ModuleScore => {
   const sentences = analyze_user_sentences(system, user)
-  if (!sentences.length) return { score: 0, detail: [] }
+  if (!sentences.length) return { score: 0, detail: [], confidence: 0.7 }
   const maxScore = Math.max(...sentences.map(s => s.score))
   const risky = sentences
     .map((seg, idx) => ({ seg, idx }))
     .filter(item => item.seg.score >= removal_threshold)
     .map(({ seg, idx }) => `segment_${idx}_risk_${seg.score.toFixed(2)}`)
-  return { score: normalize(maxScore), detail: risky }
+
+  // Confidence based on segment analysis depth and risk clarity
+  let confidence = 0.7  // Baseline
+  if (risky.length > 0) {
+    // High confidence when risky segments found
+    confidence = 0.85 + Math.min(0.15, maxScore * 0.3)
+  } else if (sentences.length >= 3) {
+    // Moderate confidence when multiple clean segments
+    confidence = 0.8
+  }
+
+  return { score: normalize(maxScore), detail: risky, confidence }
 }
 
 export const sanitize_user_input = (system: string, user: string) => {

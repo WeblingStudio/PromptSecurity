@@ -24,5 +24,18 @@ export const score_semantic = (txt: string): ModuleScore => {
   const level = best >= 0.78 ? "high" : best >= 0.65 ? "medium" : "low"
   const detail = level === "low" ? [] : [`semantic_${level}_${tag}`]
   const score = best >= 0.65 ? best : best * 0.5
-  return { score: normalize(score), detail }
+
+  // Confidence scales with similarity strength
+  let confidence = 0.5  // Default moderate confidence
+  if (best >= 0.95) {
+    confidence = 1.0  // Very high similarity = very confident
+  } else if (best >= 0.78) {
+    confidence = 0.8 + (best - 0.78) * 1.0  // High: 0.8-0.95
+  } else if (best >= 0.65) {
+    confidence = 0.7 + (best - 0.65) * 0.8  // Medium: 0.7-0.8
+  } else {
+    confidence = 0.4 + best * 0.5  // Low: 0.4-0.7
+  }
+
+  return { score: normalize(score), detail, confidence }
 }
