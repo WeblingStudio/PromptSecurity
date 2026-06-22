@@ -1,6 +1,6 @@
 import { ModuleScore } from "../types"
 import { signaturePatterns } from "../data"
-import { seg_text, normalize } from "../core/embedding"
+import { normalize } from "../core/embedding"
 
 type trie_node = { next: Record<string, trie_node>; end?: string[] }
 
@@ -19,7 +19,7 @@ const make_trie = (phrases: string[]): trie_node => {
 
 const sig_trie = make_trie(signaturePatterns)
 
-const scan_trie = (txt: string) => {
+const scan_trie = (txt: string): string[] => {
   const hits = new Set<string>()
   const lo = txt.toLowerCase()
   for (let i = 0; i < lo.length; i++) {
@@ -37,56 +37,103 @@ const scan_trie = (txt: string) => {
   return [...hits]
 }
 
-const levenshtein = (a: string, b: string) => {
-  const la = a.length, lb = b.length
-  if (la === 0) return lb
-  if (lb === 0) return la
-  const prev = new Array(lb + 1).fill(0)
-  const cur = new Array(lb + 1).fill(0)
-  for (let j = 0; j <= lb; j++)prev[j] = j
-  for (let i = 1; i <= la; i++) {
-    cur[0] = i
-    const ca = a.charCodeAt(i - 1)
-    for (let j = 1; j <= lb; j++) {
-      const cb = b.charCodeAt(j - 1)
-      if (ca === cb) cur[j] = prev[j - 1]
-      else cur[j] = Math.min(prev[j - 1], prev[j], cur[j - 1]) + 1
-    }
-    for (let j = 0; j <= lb; j++)prev[j] = cur[j]
-  }
-  return cur[lb]
-}
-
-const fuzzy_hits = (txt: string) => {
-  const segs = seg_text(txt)
-  const result: { phrase: string; sim: number }[] = []
-  for (const phrase of signaturePatterns) {
-    for (const seg of segs) {
-      const lv = levenshtein(seg, phrase)
-      const sim = 1 - lv / Math.max(seg.length, phrase.length)
-      if (sim > 0.82) result.push({ phrase, sim })
-    }
+const collapse_repeats = (s: string): string => {
+  let result = ''
+  let prev = '', prevPrev = ''
+  for (const ch of s) {
+    if (ch === prev && ch === prevPrev) continue
+    result += ch
+    prevPrev = prev
+    prev = ch
   }
   return result
 }
 
+const normalize_for_fuzzy = (s: string): string =>
+  collapse_repeats(s.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim())
+
+const char_trigrams = (s: string): Set<string> => {
+  const t = new Set<string>()
+  for (let i = 0; i <= s.length - 3; i++) {
+    t.add(s.slice(i, i + 3))
+  }
+  return t
+}
+
+interface PatternTrigramEntry {
+  trigrams: Set<string>
+  pattern: string
+  size: number
+}
+
+const pattern_trigram_data: PatternTrigramEntry[] = signaturePatterns.map(p => {
+  const norm = normalize_for_fuzzy(p)
+  const trigrams = char_trigrams(norm)
+  return { trigrams, pattern: p, size: trigrams.size }
+})
+
+const trigram_index = new Map<string, number[]>()
+pattern_trigram_data.forEach((ptd, idx) => {
+  for (const tri of ptd.trigrams) {
+    const list = trigram_index.get(tri)
+    if (list) list.push(idx)
+    else trigram_index.set(tri, [idx])
+  }
+})
+
+const fuzzy_hits = (txt: string): { phrase: string; sim: number }[] => {
+  const norm = normalize_for_fuzzy(txt)
+  const input_tris = char_trigrams(norm)
+
+  const hit_counts = new Map<number, number>()
+  for (const tri of input_tris) {
+    const indices = trigram_index.get(tri)
+    if (indices) {
+      for (const idx of indices) {
+        hit_counts.set(idx, (hit_counts.get(idx) ?? 0) + 1)
+      }
+    }
+  }
+
+  const results: { phrase: string; sim: number }[] = []
+  for (const [idx, count] of hit_counts) {
+    const ptd = pattern_trigram_data[idx]
+    if (ptd.size === 0) continue
+    const containment = count / ptd.size
+    const threshold = ptd.size < 15 ? 0.88 : 0.78
+    if (containment >= threshold) {
+      results.push({ phrase: ptd.pattern, sim: containment })
+    }
+  }
+
+  return results
+}
+
 export const score_signatures = (txt: string): ModuleScore => {
-  const exact = scan_trie(txt)
+  let exact = scan_trie(txt)
+
+  const collapsed = collapse_repeats(txt)
+  if (collapsed !== txt) {
+    const extra = scan_trie(collapsed)
+    for (const h of extra) {
+      if (!exact.includes(h)) exact.push(h)
+    }
+  }
+
   const fuzzy = fuzzy_hits(txt)
   const reasons: string[] = []
   if (exact.length) reasons.push("direct_signature_" + exact[0])
   if (fuzzy.length) reasons.push("fuzzy_signature_" + fuzzy[0].phrase)
   const ex_score = exact.length ? Math.min(1, 0.6 + 0.1 * (exact.length - 1)) : 0
   const f_best = fuzzy.reduce((m, v) => Math.max(m, v.sim), 0)
-  const f_score = f_best ? ((f_best - 0.82) / (1 - 0.82)) * 0.6 : 0
+  const f_threshold = f_best >= 0.88 ? 0.88 : 0.78
+  const f_score = f_best >= f_threshold ? ((f_best - f_threshold) / (1 - f_threshold)) * 0.6 : 0
 
-  // Confidence: 1.0 for exact match, based on similarity for fuzzy, 0.3 for no match
-  let confidence = 0.3  // Low confidence when no signatures found
+  let confidence = 0.3
   if (exact.length > 0) {
-    confidence = 1.0  // 100% confident in exact signature matches
+    confidence = 1.0
   } else if (fuzzy.length > 0) {
-    // Confidence scales with fuzzy match quality (0.82-1.0 → 0.85-0.95)
-    confidence = 0.85 + (f_best - 0.82) * 0.5
+    confidence = 0.85 + (f_best - f_threshold) * 0.5
   }
 
   return { score: normalize(ex_score + f_score), detail: reasons, confidence }

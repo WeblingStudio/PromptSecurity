@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "feeds": [
+    {
+      "name": "deepset-prompt-injections",
+      "type": "huggingface",
+      "url": "https://huggingface.co/datasets/deepset/prompt-injections",
+      "format": "jsonl",
+      "field": "text",
+      "labelField": "label",
+      "labelValue": 1,
+      "enabled": true
+    },
+    {
+      "name": "markush1-jailbreak-llm",
+      "type": "huggingface",
+      "url": "https://huggingface.co/datasets/markush1/LLM-Jailbreak-Classifier",
+      "format": "jsonl",
+      "field": "prompt",
+      "labelField": "type",
+      "labelValue": "jailbreak",
+      "enabled": false
+    },
+    {
+      "name": "custom-patterns",
+      "type": "github",
+      "url": "https://raw.githubusercontent.com/WeblingStudio/PromptSecurity/main/data/patterns.json",
+      "format": "json",
+      "target": "patterns",
+      "enabled": false
+    }
+  ],
+  "settings": {
+    "backupBeforeUpdate": true,
+    "maxPatternsPerFeed": 500,
+    "maxThreatSamplesPerFeed": 200,
+    "autoMerge": true,
+    "deduplicateThreshold": 0.95
+  }
+}
