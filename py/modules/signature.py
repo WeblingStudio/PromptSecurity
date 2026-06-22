@@ -45,7 +45,7 @@ def _scan(txt: str) -> List[str]:
     return list(dict.fromkeys(hits))
 
 
-def _collapse_repeats(s: str) -> str:
+def _collapse_repeats_mild(s: str) -> str:
     result: List[str] = []
     prev = prev_prev = ""
     for ch in s:
@@ -57,13 +57,28 @@ def _collapse_repeats(s: str) -> str:
     return "".join(result)
 
 
-_NON_ALNUM_RE = re.compile(r"[^a-z0-9 ]")
+def _collapse_repeats(s: str) -> str:
+    result: List[str] = []
+    prev = ""
+    for ch in s:
+        if ch == prev:
+            continue
+        result.append(ch)
+        prev = ch
+    return "".join(result)
+
+
+_LEET_MAP = str.maketrans({
+    "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b",
+    "@": "a", "$": "s", "!": "i", "+": "t",
+})
+_NON_ALPHA_SPACE_RE = re.compile(r"[^a-z ]")
 _MULTI_SPACE_RE = re.compile(r"\s+")
 
 
 def _normalize_for_fuzzy(s: str) -> str:
-    s = _collapse_repeats(s.lower())
-    s = _NON_ALNUM_RE.sub("", s)
+    s = _collapse_repeats(s.lower().translate(_LEET_MAP))
+    s = _NON_ALPHA_SPACE_RE.sub("", s)
     return _MULTI_SPACE_RE.sub(" ", s).strip()
 
 
@@ -118,7 +133,7 @@ def _fuzzy_hits(txt: str) -> List[Dict[str, float]]:
 def score_signatures(text: str) -> Dict[str, object]:
     exact = _scan(text)
 
-    collapsed = _collapse_repeats(text)
+    collapsed = _collapse_repeats_mild(text)
     if collapsed != text:
         extra = _scan(collapsed)
         seen = set(exact)
@@ -142,7 +157,7 @@ def score_signatures(text: str) -> Dict[str, object]:
 
 def sanitize_text(text: str) -> str:
     hits = _scan(text)
-    collapsed = _collapse_repeats(text)
+    collapsed = _collapse_repeats_mild(text)
     if collapsed != text:
         extra = _scan(collapsed)
         seen = set(hits)

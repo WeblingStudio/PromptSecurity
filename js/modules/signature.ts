@@ -37,7 +37,7 @@ const scan_trie = (txt: string): string[] => {
   return [...hits]
 }
 
-const collapse_repeats = (s: string): string => {
+const collapse_repeats_mild = (s: string): string => {
   let result = ''
   let prev = '', prevPrev = ''
   for (const ch of s) {
@@ -49,8 +49,30 @@ const collapse_repeats = (s: string): string => {
   return result
 }
 
+const collapse_repeats = (s: string): string => {
+  let result = ''
+  let prev = ''
+  for (const ch of s) {
+    if (ch === prev) continue
+    result += ch
+    prev = ch
+  }
+  return result
+}
+
+const leet_map: Record<string, string> = {
+  '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b',
+  '@': 'a', '$': 's', '!': 'i', '+': 't'
+}
+
+const apply_leet = (s: string): string => {
+  let out = ''
+  for (const ch of s) out += leet_map[ch] ?? ch
+  return out
+}
+
 const normalize_for_fuzzy = (s: string): string =>
-  collapse_repeats(s.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim())
+  collapse_repeats(apply_leet(s.toLowerCase()).replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim())
 
 const char_trigrams = (s: string): Set<string> => {
   const t = new Set<string>()
@@ -112,7 +134,7 @@ const fuzzy_hits = (txt: string): { phrase: string; sim: number }[] => {
 export const score_signatures = (txt: string): ModuleScore => {
   let exact = scan_trie(txt)
 
-  const collapsed = collapse_repeats(txt)
+  const collapsed = collapse_repeats_mild(txt)
   if (collapsed !== txt) {
     const extra = scan_trie(collapsed)
     for (const h of extra) {

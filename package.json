@@ -1,6 +1,6 @@
 {
   "name": "@webling/promptsecurity",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Protect your AI from Prompt Injection",
   "keywords": [
     "llm",
