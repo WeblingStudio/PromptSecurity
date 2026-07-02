@@ -47,7 +47,7 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
       risk,
       confidence: signature.confidence ?? 1.0,
       reason: Array.from(new Set(reasons)),
-      sanitized_prompt: undefined,
+      sanitized_prompt: normalizedUser,
       modules: { signature, semantic: { score: 0, detail: [], confidence: 0 }, integrity: { score: 0, detail: [], confidence: 0 }, rag: { score: 0, detail: [], confidence: 0 }, unicode, segments: { score: 0, detail: [], confidence: 0 }, intent: emptyIntent }
     }
   }
@@ -68,7 +68,7 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
       risk: Number(risk.toFixed(3)),
       confidence: intent.confidence ?? 0.9,
       reason: Array.from(new Set(reasons)),
-      sanitized_prompt: undefined,
+      sanitized_prompt: normalizedUser,
       modules: { signature, semantic, integrity: { score: 0, detail: [], confidence: 0 }, rag: { score: 0, detail: [], confidence: 0 }, unicode, segments: { score: 0, detail: [], confidence: 0 }, intent: intentModule }
     }
   }
@@ -176,7 +176,7 @@ export const run_promptsecurity = (input: ShieldInput, weights = default_weights
     removal_note,
     sanitized_chunks.length ? sanitized_chunks.join("\n") : ""
   ].filter(Boolean)
-  const sanitized_prompt = sanitized_parts.length ? sanitized_parts.join("\n") : undefined
+  const sanitized_prompt = sanitized_parts.length ? sanitized_parts.join("\n") : normalizedUser
 
   // Compute aggregated confidence as weighted average of active module confidences
   const moduleConfidences = [

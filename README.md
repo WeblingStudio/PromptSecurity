@@ -35,6 +35,7 @@ LLMs are new attack surfaces. Prompt injections, DAN role-play, poisoned RAG con
 | Unicode Exploit Scanner | Flags ZWJ, BiDi overrides, and homoglyph manipulations.                         |
 | Sentence Sanitizer      | Removes hostile sentences while preserving user intent.                         |
 | Intent Classification   | Distinguishes malicious jailbreaks from legitimate security research and creative writing. |
+| Fuzzy Signature Match   | Trigram-based detection catches typos and misspellings in jailbreak phrases.       |
 | Obfuscation Detection   | Detects and normalizes Base64, ROT13, leetspeak, homoglyphs, and token splitting. |
 | Multi-Turn Tracking     | Tracks conversation sessions to detect gradual escalation and context injection attacks. |
 | Confidence Scoring      | Per-module and aggregated confidence scores for explainable risk decisions.      |

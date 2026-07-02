@@ -24,7 +24,7 @@ export type ShieldResult = {
   risk: Score
   confidence: number  // 0-1, aggregated confidence across all modules
   reason: string[]
-  sanitized_prompt?: Prompt
+  sanitized_prompt: Prompt
   modules: {
     signature: ModuleScore
     semantic: ModuleScore

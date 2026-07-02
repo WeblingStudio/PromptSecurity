@@ -70,7 +70,7 @@ def run_promptsecurity(user: str, system: str = "", rag: List[str] | None = None
             sanitized_user if sanitized_user else "[promptsecurity removed user content]"
         )
     sanitized_parts = [part for part in [user_line, removal_note, "\n".join(sanitized_chunks)] if part]
-    sanitized_prompt = "\n".join(sanitized_parts) if sanitized_parts else None
+    sanitized_prompt = "\n".join(sanitized_parts) if sanitized_parts else user
     rag_changed = any(chunk.startswith("[rag chunk") for chunk in sanitized_chunks)
     rag_drops = any("_drop" in reason for reason in rag_score["detail"])
 
